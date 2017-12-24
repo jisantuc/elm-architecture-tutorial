@@ -1,4 +1,5 @@
 import Html exposing (..)
+import Html.Attributes exposing (src, style)
 import Html.Events exposing (..)
 import Random
 
@@ -62,6 +63,9 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
   div []
-    [ h1 [] [ text (toString model.dieFace) ]
+    [div [] [
+          img [src ("images/dice-" ++ toString model.dieFace ++ ".png")
+              , style [("width", "25%")]] []
+         ]
     , button [ onClick Roll ] [ text "Roll" ]
     ]
