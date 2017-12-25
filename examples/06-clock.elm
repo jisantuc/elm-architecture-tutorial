@@ -17,6 +17,37 @@ main =
 
 
 
+-- Helpers
+
+
+type alias StrokeWidth =
+    Int
+
+
+
+-- for rotating the clock to a human-oriented angle
+
+
+halfRadian : Float
+halfRadian =
+    pi / 2
+
+
+mkRadialLine : Float -> Float -> StrokeWidth -> Svg Msg
+mkRadialLine x y s =
+    line [ x1 "50", y1 "50", x2 (toString x), y2 (toString y), stroke "#023963", strokeWidth (toString s) ] []
+
+
+
+-- convert an angle and ray length to (x, y) coordinates
+
+
+radiansToXY : Float -> Float -> ( Float, Float )
+radiansToXY rad len =
+    ( 50 + len * cos rad, 50 + len * sin rad )
+
+
+
 -- MODEL
 
 
@@ -77,9 +108,6 @@ subscriptions model =
 
 -- VIEW
 
--- for rotating the clock to a human-oriented angle
-halfRadian : Float
-halfRadian = pi / 2
 
 view : Model -> Html Msg
 view model =
@@ -87,29 +115,16 @@ view model =
         secondsAngle =
             turns (Time.inMinutes model.seconds) - halfRadian
 
-        secondHandX =
-            toString (50 + 40 * cos secondsAngle)
-
-        secondHandY =
-            toString (50 + 40 * sin secondsAngle)
-
         minutesAngle =
             turns (toFloat ((floor model.minutes) % 60) / 60) - halfRadian
-
-        minuteHandX =
-            toString (50 + 40 * cos minutesAngle)
-
-        minuteHandY =
-            toString (50 + 40 * sin minutesAngle)
 
         hoursAngle =
             turns (toFloat ((floor model.hours) % 12) / 12) - halfRadian
 
-        hourHandX =
-            toString (50 + 25 * cos hoursAngle)
+        (secondHandX, secondHandY) = radiansToXY secondsAngle 40
+        (minuteHandX, minuteHandY) = radiansToXY minutesAngle 40
+        (hourHandX, hourHandY) = radiansToXY hoursAngle 25
 
-        hourHandY =
-            toString (50 + 25 * sin hoursAngle)
     in
         Html.div []
             [ Html.button [ onClick Pause ]
@@ -123,8 +138,8 @@ view model =
             , Html.br [] []
             , svg [ viewBox "0 0 100 100", width "300px" ]
                 [ circle [ cx "50", cy "50", r "45", fill "#0B79CE" ] []
-                , line [ x1 "50", y1 "50", x2 secondHandX, y2 secondHandY, stroke "#023963", strokeWidth "1" ] []
-                , line [ x1 "50", y1 "50", x2 minuteHandX, y2 minuteHandY, stroke "#023963", strokeWidth "2" ] []
-                , line [ x1 "50", y1 "50", x2 hourHandX, y2 hourHandY, stroke "#023963", strokeWidth "2" ] []
+                , mkRadialLine secondHandX secondHandY 1
+                , mkRadialLine minuteHandX minuteHandY 2
+                , mkRadialLine hourHandX hourHandY 2
                 ]
             ]
