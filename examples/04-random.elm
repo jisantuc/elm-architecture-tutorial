@@ -1,9 +1,15 @@
 import Html exposing (..)
-import Html.Attributes exposing (src, style)
 import Html.Events exposing (..)
+
+import Svg exposing (Svg, svg, circle, rect)
+import Svg.Attributes exposing ( width
+                               , height
+                               , fill
+                               , cx
+                               , cy
+                               , r
+                               )
 import Random
-
-
 
 main =
   Html.program
@@ -60,17 +66,32 @@ subscriptions model =
 
 -- VIEW
 
+mkCx : Int -> String
+mkCx pip =
+    if pip > 3 then "66" else "33"
 
-mkImage : Int -> Html Msg
-mkImage dieFace =
-    img [src ("images/dice-" ++ toString dieFace ++ ".png")
-        , style [("width", "25%")]] []
+mkCy : Int -> String
+mkCy pip =
+    case (pip % 3) of
+        0  -> "20"
+        1 -> "50"
+        _ -> "80"
+
+mkCircle : Int -> Svg Msg
+mkCircle pip = circle [cx (mkCx pip), cy (mkCy pip), r "5", fill "red"] []
+
+addPip : Int -> List (Svg Msg) -> List (Svg Msg)
+addPip x pips = pips ++ [mkCircle x]
+
+mkSvg : Int -> Svg Msg
+mkSvg dieVal =
+    svg [width "100", height "100"] (List.foldl addPip [] (List.range 1 dieVal))
 
 view : Model -> Html Msg
 view model =
   div []
-    [div [] [ mkImage model.dieFace1
-            ,  mkImage model.dieFace2
+    [div [] [ mkSvg model.dieFace1
+            ,  mkSvg model.dieFace2
             ]
     , button [ onClick Roll ] [ text "Roll" ]
     ]
